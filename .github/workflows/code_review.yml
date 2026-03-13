@@ -17,7 +17,7 @@ jobs:
       image: rathorkrish/review-robo
     env:
       # Job-level env so the container sees these when it starts
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
       CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
       MR_REVIEW_COLLECTOR_URL: ${{ secrets.MR_REVIEW_COLLECTOR_URL }}
     steps:
@@ -25,6 +25,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "GH_TOKEN is empty (mapped from secrets.GITHUB_TOKEN)."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY}" ]; then
+            echo "CURSOR_API_KEY secret is missing."
+            exit 1
+          fi
 
       - name: Run review-robo
         run: node /app/dist/index.js
