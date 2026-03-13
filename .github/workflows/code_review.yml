@@ -16,7 +16,6 @@ jobs:
     container:
       image: rathorkrish/review-robo
     env:
-      GITHUB_WORKSPACE: /github/workspace
       # Job-level env so the container sees these when it starts
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
@@ -29,13 +28,12 @@ jobs:
 
       - name: Run review-robo
         run: node /app/dist/index.js
-        working-directory: /github/workspace
 
       - name: Upload review artifacts
         uses: actions/upload-artifact@v4
         with:
           name: review-artifacts
-          path: /github/workspace/.cursor/reviews/
+          path: .cursor/reviews/
           retention-days: 7
         if: success()
 
