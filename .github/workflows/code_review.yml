@@ -22,6 +22,7 @@ jobs:
       - name: Run review-robo
         run: node /app/dist/index.js
         env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           # Optional: send review data to your collector
           MR_REVIEW_COLLECTOR_URL: ${{ secrets.MR_REVIEW_COLLECTOR_URL }}
