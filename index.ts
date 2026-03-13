@@ -1,1 +1,3 @@
-console.log("Hello via Bun!");
+export const sum = (a: number, b: number) => {
+  return a + b;
+}
