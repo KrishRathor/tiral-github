@@ -1,5 +1,9 @@
 # Run review-robo on every pull request (same idea as GitLab: only merge_requests).
-# Uses your Docker image; GITHUB_TOKEN is provided automatically by Actions.
+# Uses your Docker image. Pass GH_TOKEN (app expects this; we set it from default GITHUB_TOKEN).
+#
+# If you see "no matching manifest for linux/amd64", the image was built for another
+# arch (e.g. Mac arm64). Rebuild for amd64 and push — see docs/DOCKERHUB-BUILD-AND-RUN.md
+# section "Build for GitHub Actions (linux/amd64)".
 
 name: Code Review
 
@@ -12,20 +16,29 @@ jobs:
     container:
       image: rathorkrish/review-robo
     env:
-      GITHUB_WORKSPACE: /github/workspace
+      # Job-level env so the container sees these when it starts
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+      MR_REVIEW_COLLECTOR_URL: ${{ secrets.MR_REVIEW_COLLECTOR_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Validate required secrets
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "GH_TOKEN is empty (mapped from secrets.GITHUB_TOKEN)."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY}" ]; then
+            echo "CURSOR_API_KEY secret is missing."
+            exit 1
+          fi
+
       - name: Run review-robo
         run: node /app/dist/index.js
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          # Optional: send review data to your collector
-          MR_REVIEW_COLLECTOR_URL: ${{ secrets.MR_REVIEW_COLLECTOR_URL }}
 
       - name: Upload review artifacts
         uses: actions/upload-artifact@v4
@@ -39,3 +52,4 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
+

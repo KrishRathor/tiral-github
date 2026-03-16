@@ -5,3 +5,7 @@ export const sum = (a: number, b: number) => {
 export const diff = (a: number, b: number) => {
   return a - b;
 }
+
+export const product = (a: number, b: number) => {
+  return a * b;
+}
